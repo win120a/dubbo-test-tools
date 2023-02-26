@@ -17,18 +17,9 @@
 
 package org.apache.dubbo.errorcode.linktest;
 
-import org.apache.dubbo.errorcode.util.ErrorUrlUtils;
-
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
@@ -36,9 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Link testing (fork-join) task.
  */
-public class LinkTestingForkJoinTask extends RecursiveTask<Map<String, Boolean>> {
-
-    private static final CloseableHttpClient HTTP_CLIENT = HttpClients.createDefault();
+public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
 
     private static final int THRESHOLD = 10;
 
@@ -50,53 +39,44 @@ public class LinkTestingForkJoinTask extends RecursiveTask<Map<String, Boolean>>
 
     private static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool();
 
-    public LinkTestingForkJoinTask(int start, int end, List<String> url) {
+    private final LinkTester linkTester;
+
+    public LinkTestingForkJoinTask(int start, int end, List<String> url, LinkTester linkTester) {
         this.start = start;
         this.end = end;
         this.url = url;
+        this.linkTester = linkTester;
     }
 
     @Override
-    protected Map<String, Boolean> compute() {
+    protected List<String> compute() {
 
         if (end - start >= THRESHOLD) {
 
             int middle = (start + end) / 2;
 
-            LinkTestingForkJoinTask left = new LinkTestingForkJoinTask(start, middle, url);
-            LinkTestingForkJoinTask right = new LinkTestingForkJoinTask(middle, end, url);
+            LinkTestingForkJoinTask left = new LinkTestingForkJoinTask(start, middle, url, linkTester);
+            LinkTestingForkJoinTask right = new LinkTestingForkJoinTask(middle, end, url, linkTester);
 
             left.fork();
             right.fork();
 
-            Map<String, Boolean> leftR = left.join();
-            Map<String, Boolean> rightR = right.join();
+            List<String> leftR = left.join();
+            List<String> rightR = right.join();
 
-            Map<String, Boolean> result = new HashMap<>(end - start);
+            List<String> result = new ArrayList<>(end - start);
 
-            result.putAll(leftR);
-            result.putAll(rightR);
+            result.addAll(leftR);
+            result.addAll(rightR);
 
             return result;
 
         } else {
 
-            HashMap<String, Boolean> result = new HashMap<>();
+            List<String> result = new ArrayList<>();
 
             for (int i = start; i < end; i++) {
-
-                HttpGet getRequest = new HttpGet(url.get(i));
-                getRequest.addHeader("Accept-Language", "zh-CN");
-
-                try {
-
-                    try (CloseableHttpResponse resp = HTTP_CLIENT.execute(getRequest)) {
-                        result.put(url.get(i), resp.getStatusLine().getStatusCode() == 200);
-                    }
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                result.addAll(linkTester.test(url.subList(start, end)));
             }
 
             return result;
@@ -104,25 +84,24 @@ public class LinkTestingForkJoinTask extends RecursiveTask<Map<String, Boolean>>
     }
 
     public static void closeHttpClient() {
-        try {
-            HTTP_CLIENT.close();
-            FORK_JOIN_POOL.shutdown();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FORK_JOIN_POOL.shutdown();
     }
 
     public static List<String> findDocumentMissingErrorCodes(List<String> codes) {
 
-        List<String> urls = codes.stream().distinct().sorted().map(ErrorUrlUtils::getErrorUrl).collect(Collectors.toList());
-        LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls);
+        List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
-        Set<Map.Entry<String, Boolean>> linkResults = FORK_JOIN_POOL.invoke(firstTask).entrySet();
+        try (LinkTester linkTester = new HttpRequestingLinkTester()) {
+            LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls, linkTester);
 
-        return linkResults.stream()
-            .filter(e -> !e.getValue())
-            .map(Map.Entry::getKey)
-            .map(ErrorUrlUtils::getErrorCodeThroughErrorUrl)
-            .collect(Collectors.toList());
+            return FORK_JOIN_POOL.invoke(firstTask)
+                    .stream()
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
