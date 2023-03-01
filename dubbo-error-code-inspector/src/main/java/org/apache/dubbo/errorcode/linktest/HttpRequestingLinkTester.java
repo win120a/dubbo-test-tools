@@ -30,11 +30,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Link testing (fork-join) task.
+ * Link tester which requests corresponding document link.
  */
 public class HttpRequestingLinkTester implements LinkTester {
 
-    private static final CloseableHttpClient HTTP_CLIENT = HttpClients.createDefault();
+    private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     @Override
     public List<String> test(List<String> codes) {
@@ -52,7 +52,7 @@ public class HttpRequestingLinkTester implements LinkTester {
             HttpGet getRequest = new HttpGet(url);
             getRequest.addHeader("Accept-Language", "zh-CN");
 
-            try (CloseableHttpResponse resp = HTTP_CLIENT.execute(getRequest)) {
+            try (CloseableHttpResponse resp = httpClient.execute(getRequest)) {
                 if (resp.getStatusLine().getStatusCode() != 200) {
                     result.add(ErrorUrlUtils.getErrorCodeThroughErrorUrl(url));
                 }
@@ -68,7 +68,7 @@ public class HttpRequestingLinkTester implements LinkTester {
     @Override
     public void close() {
         try {
-            HTTP_CLIENT.close();
+            httpClient.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -39,7 +39,7 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
 
     private static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool();
 
-    private final LinkTester linkTester;
+    private final transient LinkTester linkTester;
 
     public LinkTestingForkJoinTask(int start, int end, List<String> url, LinkTester linkTester) {
         this.start = start;
@@ -91,7 +91,7 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
 
         List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
-        try (LinkTester linkTester = new HttpRequestingLinkTester()) {
+        try (LinkTester linkTester = new GitRepositoryFileLinkTester()) {
             LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls, linkTester);
 
             return FORK_JOIN_POOL.invoke(firstTask)
