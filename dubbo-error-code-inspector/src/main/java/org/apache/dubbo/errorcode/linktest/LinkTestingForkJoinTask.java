@@ -91,7 +91,7 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
 
         List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
-        try (LinkTester linkTester = new GitRepositoryFileLinkTester()) {
+        try (LinkTester linkTester = new DelegatingLinkTester()) {
             LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls, linkTester);
 
             return FORK_JOIN_POOL.invoke(firstTask)
