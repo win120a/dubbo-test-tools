@@ -63,7 +63,7 @@ public class GitRepositoryFileLinkTester implements LinkTester {
         // No need.
     }
 
-    private String findFaqFilePath() {
+    private static String findFaqFilePath() {
         Path htaPath = Paths.get(PATH, ".htaccess");
 
         try (Scanner htaScanner = new Scanner(htaPath)) {
