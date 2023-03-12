@@ -205,7 +205,8 @@ public class JdtBasedInvalidLoggerInvocationLocator implements InvalidLoggerInvo
             String superClass = clsF.getSuperclass();
 
             if (Objects.equals(superClass, Object.class.getName())) {
-                return "logger";
+                // The super class is Object... Nothing to find.
+                return null;
             }
 
             String superClassSimpleName = superClass.substring(superClass.lastIndexOf('.') + 1);
