@@ -17,6 +17,8 @@
 
 package org.apache.dubbo.errorcode.linktest;
 
+import org.apache.dubbo.errorcode.util.ReflectUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,7 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
 
     private final transient LinkTester linkTester;
 
-    public LinkTestingForkJoinTask(int start, int end, List<String> url, LinkTester linkTester) {
+    LinkTestingForkJoinTask(int start, int end, List<String> url, LinkTester linkTester) {
         this.start = start;
         this.end = end;
         this.url = url;
@@ -87,11 +89,28 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
         FORK_JOIN_POOL.shutdown();
     }
 
+    /**
+     * Public entry method of LinkTestingForkJoinTask using DelegatingLinkTester.
+     *
+     * @param codes codes to test
+     * @return codes that missing corresponding document
+     */
     public static List<String> findDocumentMissingErrorCodes(List<String> codes) {
 
+        return findDocumentMissingErrorCodes(DelegatingLinkTester.class, codes);
+    }
+
+    /**
+     * Entry method of LinkTestingForkJoinTask using custom link tester. Used by unit test.
+     *
+     * @param codes codes to test
+     * @param linkTesterClass class object of link tester.
+     * @return codes that missing corresponding document
+     */
+    static List<String> findDocumentMissingErrorCodes(Class<? extends LinkTester> linkTesterClass, List<String> codes) {
         List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
-        try (LinkTester linkTester = new DelegatingLinkTester()) {
+        try (LinkTester linkTester = ReflectUtils.createInstance(linkTesterClass)) {
             LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls, linkTester);
 
             return FORK_JOIN_POOL.invoke(firstTask)
@@ -100,7 +119,7 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
                     .sorted()
                     .collect(Collectors.toList());
 
-        } catch (IOException e) {
+        } catch (IOException | ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }

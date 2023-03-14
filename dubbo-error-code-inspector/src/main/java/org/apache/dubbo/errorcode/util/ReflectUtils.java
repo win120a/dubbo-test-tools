@@ -18,6 +18,7 @@
 package org.apache.dubbo.errorcode.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Tools of reflective operations.
@@ -46,6 +47,18 @@ public final class ReflectUtils {
             }
 
             return getDeclaredFieldRecursively(cls.getSuperclass(), name);
+        }
+    }
+
+    public static <T> T createInstance(Class<? extends T> cls) throws ReflectiveOperationException {
+
+        try {
+            return cls.getConstructor().newInstance();
+
+        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException |
+                 IllegalAccessException e) {
+
+            throw new ReflectiveOperationException(e);
         }
     }
 }
