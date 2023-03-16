@@ -17,8 +17,6 @@
 
 package org.apache.dubbo.errorcode.linktest;
 
-import org.apache.dubbo.errorcode.util.ReflectUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,20 +95,21 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
      */
     public static List<String> findDocumentMissingErrorCodes(List<String> codes) {
 
-        return findDocumentMissingErrorCodes(DelegatingLinkTester.class, codes);
+        return findDocumentMissingErrorCodes(new DelegatingLinkTester(), codes);
     }
 
     /**
-     * Entry method of LinkTestingForkJoinTask using custom link tester. Used by unit test.
+     * <p>Entry method of LinkTestingForkJoinTask using custom link tester. Used by unit test.
+     * <p>The link tester will be closed when completed.
      *
      * @param codes codes to test
-     * @param linkTesterClass class object of link tester.
+     * @param testerObject link tester object
      * @return codes that missing corresponding document
      */
-    static List<String> findDocumentMissingErrorCodes(Class<? extends LinkTester> linkTesterClass, List<String> codes) {
+    static List<String> findDocumentMissingErrorCodes(LinkTester testerObject, List<String> codes) {
         List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
-        try (LinkTester linkTester = ReflectUtils.createInstance(linkTesterClass)) {
+        try (LinkTester linkTester = echo(testerObject)) {
             LinkTestingForkJoinTask firstTask = new LinkTestingForkJoinTask(0, urls.size(), urls, linkTester);
 
             return FORK_JOIN_POOL.invoke(firstTask)
@@ -119,8 +118,12 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
                     .sorted()
                     .collect(Collectors.toList());
 
-        } catch (IOException | ReflectiveOperationException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static <T> T echo(T object) {
+        return object;
     }
 }
