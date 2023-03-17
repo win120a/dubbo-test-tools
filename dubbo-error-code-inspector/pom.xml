@@ -96,6 +96,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Keep in mind that Mockito 5 needs Java 11. -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

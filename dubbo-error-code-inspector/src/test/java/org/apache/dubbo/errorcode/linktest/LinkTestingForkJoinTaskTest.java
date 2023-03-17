@@ -73,4 +73,10 @@ class LinkTestingForkJoinTaskTest {
         Assertions.assertEquals(expectedReturn,
                 LinkTestingForkJoinTask.findDocumentMissingErrorCodes(linkTester, errorCodesToTest));
     }
+
+    @Test
+    void testNullValues() {
+        Assertions.assertEquals(Collections.emptyList(),
+                LinkTestingForkJoinTask.findDocumentMissingErrorCodes(null, null));
+    }
 }

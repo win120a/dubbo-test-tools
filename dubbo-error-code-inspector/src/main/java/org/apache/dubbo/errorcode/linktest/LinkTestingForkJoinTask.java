@@ -19,6 +19,7 @@ package org.apache.dubbo.errorcode.linktest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
@@ -107,6 +108,11 @@ public class LinkTestingForkJoinTask extends RecursiveTask<List<String>> {
      * @return codes that missing corresponding document
      */
     static List<String> findDocumentMissingErrorCodes(LinkTester testerObject, List<String> codes) {
+
+        if (codes == null || codes.isEmpty() || testerObject == null) {
+            return Collections.emptyList();
+        }
+
         List<String> urls = codes.stream().distinct().sorted().collect(Collectors.toList());
 
         try (LinkTester linkTester = echo(testerObject)) {
