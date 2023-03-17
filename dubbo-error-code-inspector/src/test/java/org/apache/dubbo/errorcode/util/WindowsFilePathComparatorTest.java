@@ -23,54 +23,10 @@ import org.junit.jupiter.api.condition.OS;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FilePathComparatorTest {
+@EnabledOnOs(OS.WINDOWS)
+class WindowsFilePathComparatorTest {
 
     @Test
-    @EnabledOnOs({OS.LINUX, OS.FREEBSD, OS.MAC})
-    void testUnixSmallerThan() {
-        assertTrue(
-                FilePathComparator.getInstance().compare(
-                        "/a/b/c",
-                        "/a/b/d"
-                ) < 0
-        );
-    }
-
-    @Test
-    @EnabledOnOs({OS.LINUX, OS.FREEBSD, OS.MAC})
-    void testUnixGreaterThan() {
-        assertTrue(
-                FilePathComparator.getInstance().compare(
-                        "/a/b/d",
-                        "/a/b/c"
-                ) > 0
-        );
-    }
-
-    @Test
-    @EnabledOnOs({OS.LINUX, OS.FREEBSD, OS.MAC})
-    void testUnixDifferentDirectorySmallerThan() {
-        assertTrue(
-                FilePathComparator.getInstance().compare(
-                        "/a/b/d",
-                        "/a/b/d/e"
-                ) < 0
-        );
-    }
-
-    @Test
-    @EnabledOnOs({OS.LINUX, OS.FREEBSD, OS.MAC})
-    void testUnixDifferentDirectoryGreaterThan() {
-        assertTrue(
-                FilePathComparator.getInstance().compare(
-                        "/a/b/d/e",
-                        "/a/b/d"
-                ) > 0
-        );
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDriveLetterSmallerThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -81,7 +37,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDriveLetterGreaterThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -92,7 +47,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDifferentDirectorySmallerThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -103,7 +57,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDifferentDirectoryGreaterThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -114,7 +67,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDifferentDirectoryGreaterThan2() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -125,7 +77,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDifferentDriveSmallerThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
@@ -136,7 +87,6 @@ class FilePathComparatorTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
     void testWindowsDifferentDriveGreaterThan() {
         assertTrue(
                 FilePathComparator.getInstance().compare(
