@@ -20,6 +20,7 @@ package org.apache.dubbo.errorcode.linktest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +28,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -75,8 +78,39 @@ class LinkTestingForkJoinTaskTest {
     }
 
     @Test
+    void verifyCloseMethodInvocation() throws IOException {
+        LinkTester linkTester = mock(LinkTester.class);
+        when(linkTester.test(anyList())).thenReturn(Collections.emptyList());
+
+        LinkTestingForkJoinTask.findDocumentMissingErrorCodes(linkTester, Collections.singletonList("1-1"));
+
+        verify(linkTester).close();
+    }
+
+    /**
+     * Verify the null check.
+     */
+    @Test
     void testNullValues() {
         Assertions.assertEquals(Collections.emptyList(),
                 LinkTestingForkJoinTask.findDocumentMissingErrorCodes(null, null));
+    }
+
+    /**
+     * Verify the empty check.
+     *
+     * @throws IOException ignored.
+     */
+    @Test
+    void testEmptyValues() throws IOException {
+
+        LinkTester linkTester = mock(LinkTester.class);
+        when(linkTester.test(anyList())).thenReturn(Collections.emptyList());
+
+        Assertions.assertEquals(Collections.emptyList(),
+                LinkTestingForkJoinTask.findDocumentMissingErrorCodes(linkTester, Collections.emptyList()));
+
+        verify(linkTester, never()).test(anyList());
+        verify(linkTester, never()).close();
     }
 }
