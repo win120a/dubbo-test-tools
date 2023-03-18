@@ -95,4 +95,12 @@ class WindowsFilePathComparatorTest {
                 ) > 0
         );
     }
+
+    @Test
+    void testEquals() {
+        assertEquals(0, FilePathComparator.getInstance().compare(
+                "E:\\httpd",
+                "E:\\httpd"
+        ));
+    }
 }

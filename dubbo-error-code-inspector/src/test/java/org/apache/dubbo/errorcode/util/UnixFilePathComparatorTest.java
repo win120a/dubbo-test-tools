@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledOnOs({OS.LINUX, OS.FREEBSD, OS.MAC})
@@ -74,5 +75,10 @@ class UnixFilePathComparatorTest {
                         "/a/b/d"
                 ) < 0
         );
+    }
+
+    @Test
+    void testEquals() {
+        assertEquals(0, FilePathComparator.getInstance().compare("/", "/"));
     }
 }
