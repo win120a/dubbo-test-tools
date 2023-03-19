@@ -17,6 +17,8 @@
 
 package org.apache.dubbo.errorcode.linktest;
 
+import org.apache.dubbo.errorcode.linktest.impl.DelegatingLinkTester;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

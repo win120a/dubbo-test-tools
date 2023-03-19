@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.errorcode.linktest;
+package org.apache.dubbo.errorcode.linktest.impl;
 
+import org.apache.dubbo.errorcode.linktest.LinkTester;
 import org.apache.dubbo.errorcode.util.ErrorUrlUtils;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -26,6 +27,7 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,10 +36,22 @@ import java.util.stream.Collectors;
  */
 public class HttpRequestingLinkTester implements LinkTester {
 
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
+    private final CloseableHttpClient httpClient;
+
+    public HttpRequestingLinkTester() {
+        this(HttpClients.createDefault());
+    }
+
+    HttpRequestingLinkTester(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
     @Override
     public List<String> test(List<String> codes) {
+
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<String> urls = codes.stream()
                 .distinct()

@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.dubbo.errorcode.linktest;
+package org.apache.dubbo.errorcode.linktest.impl;
+
+import org.apache.dubbo.errorcode.linktest.LinkTester;
 
 import java.io.IOException;
 import java.util.List;
