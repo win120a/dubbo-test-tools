@@ -56,8 +56,8 @@ public class ErrorCodeInspectorConfig {
                 tempReporters.add(r);
 
             } catch (InstantiationException | NoSuchMethodException | InvocationTargetException |
-                     IllegalAccessException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                     IllegalAccessException | ClassNotFoundException ignored) {
+                // Just continue.
             }
         }
 
