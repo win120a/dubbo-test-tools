@@ -21,6 +21,7 @@ import org.apache.dubbo.errorcode.linktest.LinkTester;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Delegating LinkTester, which tests the property and selects the tester.
@@ -29,13 +30,28 @@ public class DelegatingLinkTester implements LinkTester {
 
     private LinkTester linkTester;
 
+    private final Supplier<? extends LinkTester> fallbackLinkTesterSupplier;
+
     public DelegatingLinkTester() {
-        if (System.getProperty("dubbo.eci.link-test.repo") == null) {
-            System.out.println("Initially use HTTP Requesting Link Tester.");
+
+        String testingRepoProperty = System.getProperty("dubbo.eci.link-test.repo");
+
+        if (testingRepoProperty == null || testingRepoProperty.isEmpty()) {
             linkTester = new HttpRequestingLinkTester();
         } else {
             linkTester = new GitRepositoryFileLinkTester();
         }
+
+        fallbackLinkTesterSupplier = HttpRequestingLinkTester::new;
+    }
+
+    DelegatingLinkTester(LinkTester linkTester) {
+        this(linkTester, HttpRequestingLinkTester::new);
+    }
+
+    <T extends LinkTester> DelegatingLinkTester(LinkTester linkTester, Supplier<T> fallbackLinkTesterSupplier) {
+        this.linkTester = linkTester;
+        this.fallbackLinkTesterSupplier = fallbackLinkTesterSupplier;
     }
 
     @Override
@@ -45,17 +61,21 @@ public class DelegatingLinkTester implements LinkTester {
             return linkTester.test(codesToTest);
 
         } catch (Exception e) {
-            if (linkTester.getClass() != HttpRequestingLinkTester.class) {
-                linkTester = new HttpRequestingLinkTester();
+            try {
+                linkTester = fallbackLinkTesterSupplier.get();
                 return linkTester.test(codesToTest);
+            } catch (Exception fallbackError) {
+                throw new InternalError(e);
             }
-
-            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void close() throws IOException {
         linkTester.close();
+    }
+
+    LinkTester getLinkTester() {
+        return linkTester;
     }
 }
