@@ -39,7 +39,7 @@ public class DelegatingLinkTester implements LinkTester {
         if (testingRepoProperty == null || testingRepoProperty.isEmpty()) {
             linkTester = new HttpRequestingLinkTester();
         } else {
-            linkTester = new GitRepositoryFileLinkTester();
+            linkTester = new GitRepositoryFileLinkTester(testingRepoProperty);
         }
 
         fallbackLinkTesterSupplier = HttpRequestingLinkTester::new;

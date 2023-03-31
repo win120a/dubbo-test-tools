@@ -34,7 +34,11 @@ import java.util.regex.Pattern;
  */
 public class GitRepositoryFileLinkTester implements LinkTester {
 
-    private static final String PATH = System.getProperty("dubbo.eci.link-test.repo");
+    private final String gitRepoPath;
+
+    public GitRepositoryFileLinkTester(String gitRepoPath) {
+        this.gitRepoPath = gitRepoPath;
+    }
 
     private static class GitRepoTesterPatterns {
         static final Pattern rewriteCondPattern = Pattern.compile("RewriteCond .*Accept-Language.*zh*.");
@@ -61,12 +65,12 @@ public class GitRepositoryFileLinkTester implements LinkTester {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         // No need.
     }
 
-    private static String findFaqFilePath() {
-        Path htaPath = Paths.get(PATH, ".htaccess");
+    String findFaqFilePath() {
+        Path htaPath = Paths.get(gitRepoPath, ".htaccess");
 
         try (Scanner htaScanner = new Scanner(htaPath)) {
 
@@ -90,9 +94,9 @@ public class GitRepositoryFileLinkTester implements LinkTester {
         }
     }
 
-    private static String findContentPath() {
+    String findContentPath() {
 
-        Path configTomlPath = Paths.get(PATH, "config.toml");
+        Path configTomlPath = Paths.get(gitRepoPath, "config.toml");
 
         try (Scanner configTomlScanner = new Scanner(configTomlPath)) {
             while (configTomlScanner.hasNextLine()) {
@@ -103,12 +107,13 @@ public class GitRepositoryFileLinkTester implements LinkTester {
                     while (!nextLine.startsWith("contentDir")) {
                         nextLine = configTomlScanner.nextLine();
 
+                        // Next section.
                         if (nextLine.startsWith("[")) {
                             throw new IllegalStateException("Can't find content directory in config.toml");
                         }
                     }
 
-                    return Paths.get(PATH, nextLine.split("=")[1]
+                    return Paths.get(gitRepoPath, nextLine.split("=")[1]
                             .replace("\"", "")
                             .trim()).getParent().toString();
                 }
