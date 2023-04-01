@@ -104,9 +104,23 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.9</version>
+        </dependency>
+
         <!--
             DO NOT CHANGE VERSION OF ECLIPSE-RELATED DEPENDENCIES, or it won't run on JDK 8.
         -->
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.13.1.202206130422-r</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.core</artifactId>
@@ -175,6 +189,14 @@
         </dependency>
 
     </dependencies>
+
+    <!-- To obtain JGit. -->
+    <repositories>
+        <repository>
+            <id>jgit-repository</id>
+            <url>https://repo.eclipse.org/content/groups/releases/</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
