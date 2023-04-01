@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -44,7 +45,7 @@ class GitRepositoryFileLinkTesterTest {
 
     @Test
     void testFindFaqFilePath() {
-        Assertions.assertEquals("content\\zh-cn\\docs3-v2\\java-sdk\\faq",
+        Assertions.assertEquals("content\\zh-cn\\docs3-v2\\java-sdk\\faq".replace('\\', File.separatorChar),
                 gitFilePathObject.relativize(Paths.get(linkTester.findFaqFilePath())).toString());
     }
 
