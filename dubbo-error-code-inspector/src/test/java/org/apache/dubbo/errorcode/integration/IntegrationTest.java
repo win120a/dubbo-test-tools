@@ -26,11 +26,11 @@ import org.apache.dubbo.errorcode.util.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,13 +39,15 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
-@Disabled
 @EnabledIfSystemProperty(named = "dubbo.eci.integration-test", matches = "true")
 class IntegrationTest {
 
     private static final String INTEGRATION_TEST_REPORTER = "org.apache.dubbo.errorcode.integration.IntegrationTestReporter";
+
+    private static final String WORKING_DIR = System.getProperty("java.io.tmpdir") + File.separator + "dubbo-eci-itest-" + UUID.randomUUID();
 
     private static final List<String> EXPECTED_ERROR_CODES = Arrays.asList(
             "0-1", "0-2", "0-3", "0-4", "0-5", "0-6", "0-7", "0-8", "0-9", "0-10",
@@ -69,11 +71,6 @@ class IntegrationTest {
 
     @BeforeAll
     static void init() throws IOException {
-        if (System.getProperty("dubbo.eci.integration-test") == null ||
-                !"true".equals(System.getProperty("dubbo.eci.integration-test"))) {
-            return;
-        }
-
         String reporterConfig = FileUtils.getResourceFilePath("reporter-classes.cfg");
         Path reporterConfigPathObject = Paths.get(reporterConfig);
 
@@ -86,15 +83,15 @@ class IntegrationTest {
             bufferedWriter.write(INTEGRATION_TEST_REPORTER);
         }
 
-        GitRepoHelper.initGitRepo("D:\\ci-test");
-        GitRepoHelper.buildDubbo("D:\\ci-test\\dubbo");
+        GitRepoHelper.initGitRepo(WORKING_DIR);
+        GitRepoHelper.buildDubbo(WORKING_DIR + File.separatorChar + "dubbo");
     }
 
     @Test
     void test() throws Exception {
-        System.setProperty("dubbo.eci.link-test.repo", "D:\\ci-test\\dubbo-website");
+        System.setProperty("dubbo.eci.link-test.repo", WORKING_DIR + File.separator + "dubbo-website");
 
-        Main.main(new String[] {"D:\\ci-test\\dubbo"});
+        Main.main(new String[] { WORKING_DIR + File.separator + "dubbo" });
 
         for (Reporter r : ErrorCodeInspectorConfig.REPORTERS) {
             if (r instanceof Future) {
@@ -116,11 +113,6 @@ class IntegrationTest {
 
     @AfterAll
     static void tearDown() throws IOException {
-        if (System.getProperty("dubbo.eci.integration-test") == null ||
-                !"true".equals(System.getProperty("dubbo.eci.integration-test"))) {
-            return;
-        }
-
         String reporterConfig = FileUtils.getResourceFilePath("reporter-classes.cfg");
         Path reporterConfigPathObject = Paths.get(reporterConfig);
 

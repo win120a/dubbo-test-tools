@@ -25,13 +25,29 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**
  * Helper class about Git Repository.
  */
-public class GitRepoHelper {
-    static void initGitRepo(String workingPath) {
+class GitRepoHelper {
+
+    /**
+     * Clone dubbo and dubbo-website into a directory, and reset the repository to a pre-defined commit hash.
+     *
+     * @param workingPath the directory that both repositories in
+     * @throws IOException when directory creation failed
+     */
+    static void initGitRepo(String workingPath) throws IOException {
+
+        Path workingPathObject = Paths.get(workingPath);
+
+        if (!Files.exists(workingPathObject)) {
+            Files.createDirectory(workingPathObject);
+        }
 
         // After this commit, it only has one wrong logger method invocation remaining.
         cloneRepoAndReset("https://github.com/apache/dubbo.git",
@@ -44,6 +60,13 @@ public class GitRepoHelper {
                 "5ff7a6ea1299debe6e2a41a09939af26065cc3d0");
     }
 
+    /**
+     * Clone remote Git repository and reset the Git repository to a specified commit.
+     *
+     * @param remote remote Git repository address
+     * @param destPath destination path
+     * @param targetCommitHash target hash that will reset to
+     */
     static void cloneRepoAndReset(String remote, String destPath, String targetCommitHash) {
         CloneCommand cloneCommand = new CloneCommand();
 
@@ -63,6 +86,11 @@ public class GitRepoHelper {
         }
     }
 
+    /**
+     * Invoke maven wrapper in root directory to compile dubbo project.
+     *
+     * @param dubboRepository the location of dubbo repository
+     */
     static void buildDubbo(String dubboRepository) {
 
         ProcessBuilder processBuilder = new ProcessBuilder();
