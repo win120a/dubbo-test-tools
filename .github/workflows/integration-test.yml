@@ -20,6 +20,24 @@ jobs:
       JAVA_VER: ${{ matrix.jdk }}
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'apache/dubbo'
+          ref: 3c68e9476e1c418f50608897472e1b313eb6bc94
+          path: "./dubbo"
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'apache/dubbo-website'
+          ref: 5ff7a6ea1299debe6e2a41a09939af26065cc3d0
+          path: "./dubbo-website"
+
+      - name: "Compile Dubbo (Linux)"
+        run: |
+          cd ${{ github.workspace }}/dubbo
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
+
       - name: "Set up JDK ${{ matrix.jdk }}"
         uses: actions/setup-java@v3
         with:
@@ -52,7 +70,7 @@ jobs:
         timeout-minutes: 70
         if: ${{ startsWith( matrix.os, 'ubuntu') }}
         run: |
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -Dmaven.javadoc.skip=true -Ddubbo.eci.integration-test=true
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -Dmaven.javadoc.skip=true -Ddubbo.eci.integration-test=true -Ddubbo.eci.integration-test.custom-path=.
 
       - name: "Test with Maven in Windows Platform"
         timeout-minutes: 90
@@ -60,4 +78,4 @@ jobs:
 
         # Disable rat checking in Windows platform since it causes problems.
         run: |
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -D"maven.javadoc.skip=true" -D"dubbo.eci.integration-test=true"
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -D"maven.javadoc.skip=true" -D"dubbo.eci.integration-test=true" -D"dubbo.eci.integration-test.custom-path"=.

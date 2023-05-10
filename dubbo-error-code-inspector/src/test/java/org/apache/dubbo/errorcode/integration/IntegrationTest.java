@@ -47,7 +47,13 @@ class IntegrationTest {
 
     private static final String INTEGRATION_TEST_REPORTER = "org.apache.dubbo.errorcode.integration.IntegrationTestReporter";
 
-    private static final String WORKING_DIR = System.getProperty("java.io.tmpdir") + File.separator + "dubbo-eci-itest-" + UUID.randomUUID();
+    private static final String CUSTOM_PATH = System.getProperty("dubbo.eci.integration-test.custom-path");
+
+    private static final boolean IS_CUSTOM_PATH_PRESENTS = CUSTOM_PATH != null;
+
+    private static final String WORKING_DIR = IS_CUSTOM_PATH_PRESENTS ?
+            CUSTOM_PATH :
+            System.getProperty("java.io.tmpdir") + File.separator + "dubbo-eci-itest-" + UUID.randomUUID();
 
     private static final List<String> EXPECTED_ERROR_CODES = Arrays.asList(
             "0-1", "0-2", "0-3", "0-4", "0-5", "0-6", "0-7", "0-8", "0-9", "0-10",
@@ -83,8 +89,10 @@ class IntegrationTest {
             bufferedWriter.write(INTEGRATION_TEST_REPORTER);
         }
 
-        GitRepoHelper.initGitRepo(WORKING_DIR);
-        GitRepoHelper.buildDubbo(WORKING_DIR + File.separatorChar + "dubbo");
+        if (!IS_CUSTOM_PATH_PRESENTS) {
+            GitRepoHelper.initGitRepo(WORKING_DIR);
+            GitRepoHelper.buildDubbo(WORKING_DIR + File.separatorChar + "dubbo");
+        }
     }
 
     @Test
