@@ -34,9 +34,17 @@ jobs:
           path: "./dubbo-website"
 
       - name: "Compile Dubbo (Linux)"
+        if: ${{ startsWith( matrix.os, 'ubuntu') }}
         run: |
           cd ${{ github.workspace }}/dubbo
           ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -Dcheckstyle.skip=true -Dcheckstyle_unix.skip=true -Drat.skip=true -Dmaven.javadoc.skip=true
+
+      - name: "Compile Dubbo (Windows)"
+        timeout-minutes: 90
+        if: ${{ startsWith( matrix.os, 'windows') }}
+        run: |
+          cd ${{ github.workspace }}/dubbo
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast -T 2C clean install -DskipTests=true -DskipIntegrationTests=true -D"checkstyle.skip=true" -D"checkstyle_unix.skip=true" -D"rat.skip=true" -D"maven.javadoc.skip=true"
 
       - name: "Set up JDK ${{ matrix.jdk }}"
         uses: actions/setup-java@v3
