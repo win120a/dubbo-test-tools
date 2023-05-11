@@ -70,7 +70,7 @@ jobs:
         timeout-minutes: 70
         if: ${{ startsWith( matrix.os, 'ubuntu') }}
         run: |
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -Dmaven.javadoc.skip=true -Ddubbo.eci.integration-test=true -Ddubbo.eci.integration-test.custom-path=.
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -Dmaven.javadoc.skip=true -Ddubbo.eci.integration-test=true -Ddubbo.eci.integration-test.custom-path=${{ github.workspace }}
 
       - name: "Test with Maven in Windows Platform"
         timeout-minutes: 90
@@ -78,4 +78,4 @@ jobs:
 
         # Disable rat checking in Windows platform since it causes problems.
         run: |
-          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -D"maven.javadoc.skip=true" -D"dubbo.eci.integration-test=true" -D"dubbo.eci.integration-test.custom-path"=.
+          ./mvnw --batch-mode --no-snapshot-updates -e --no-transfer-progress --fail-fast clean test verify -DskipTests=false -D"maven.javadoc.skip=true" -D"dubbo.eci.integration-test=true" -D"dubbo.eci.integration-test.custom-path"=${{ github.workspace }}
