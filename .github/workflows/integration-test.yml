@@ -7,7 +7,7 @@ permissions:
 
 jobs:
   run-tests:
-    name: Run unit tests
+    name: Run integration tests
     if: always()
     strategy:
       fail-fast: false
